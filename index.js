@@ -3,7 +3,7 @@ import makeWASocket, {
   DisconnectReason,
   fetchLatestBaileysVersion,
   makeCacheableSignalKeyStore
-} from "@whiskeysockets/baileys";
+} from "@musteqeem/baileys";
 import { Boom } from "@hapi/boom";
 import express from "express";
 import fs from "fs";
@@ -19,7 +19,7 @@ const AUTH_FOLDER = "./auth_session";
 let sock = null;
 let isConnected = false;
 
-// ========== Web Dashboard (same style as yours) ==========
+// ========== Web Dashboard ==========
 app.get("/", (req, res) => {
   res.send(`
     <!DOCTYPE html>
@@ -71,7 +71,7 @@ app.get("/", (req, res) => {
           <p class="text-emerald-400 font-semibold text-sm">✅ Bot is connected!</p>
         </div>
 
-        <!-- Channel Tools (shown when connected) -->
+        <!-- Channel Tools -->
         <div id="tools-section" class="hidden mt-6 space-y-4 border-t border-slate-800 pt-6">
           <h2 class="text-sm font-semibold text-slate-300">Get Channel ID from Invite</h2>
           <input type="text" id="invite-input" placeholder="https://whatsapp.com/channel/0029Va..."
@@ -142,7 +142,6 @@ app.get("/", (req, res) => {
             const data = await res.json();
 
             if (data.success && data.code) {
-              // Format as ABCD-EFGH
               const formatted = data.code.match(/.{1,4}/g)?.join('-') || data.code;
               document.getElementById('pairing-code-display').innerText = formatted;
               document.getElementById('code-container').classList.remove('hidden');
@@ -244,7 +243,7 @@ app.get("/api/status", (req, res) => {
   res.json({ connected: isConnected });
 });
 
-// Same pairing logic as your bot
+// Same pairing logic as your working bot
 app.post("/api/pair", async (req, res) => {
   const { phone } = req.body;
   if (!phone) {
@@ -265,7 +264,7 @@ app.post("/api/pair", async (req, res) => {
       });
     }
 
-    // Wait a moment so the socket is fully ready (helps avoid "Couldn't Link Device")
+    // Small delay improves pairing success rate
     await new Promise(r => setTimeout(r, 1500));
 
     const code = await sock.requestPairingCode(cleanNumber);
@@ -345,10 +344,17 @@ app.post("/api/create-channel", async (req, res) => {
   }
 });
 
-// ========== Baileys (same structure as your startBot) ==========
+// ========== Baileys (same style as your working bot) ==========
 async function startBot() {
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_FOLDER);
-  const { version } = await fetchLatestBaileysVersion();
+
+  let version;
+  try {
+    const result = await fetchLatestBaileysVersion();
+    version = result.version;
+  } catch (e) {
+    version = undefined; // let the library use its default
+  }
 
   sock = makeWASocket({
     version,
@@ -359,7 +365,7 @@ async function startBot() {
     logger: pino({ level: "silent" }),
     printQRInTerminal: false,
 
-    // Browser identity – important for successful pairing
+    // Browser identity – helps pairing succeed
     browser: ["Ubuntu", "Chrome", "20.0.04"],
 
     markOnlineOnConnect: false,
@@ -379,9 +385,10 @@ async function startBot() {
 
       console.log("Connection closed. Code:", statusCode);
 
-      // 515 = restart required (NORMAL right after successful pairing)
-      // 401 / loggedOut = session is bad → clean and restart
-      const isLoggedOut = statusCode === DisconnectReason.loggedOut || statusCode === 401;
+      // 515 = normal restart after successful pairing
+      // 401 / loggedOut = bad session → delete and restart
+      const isLoggedOut =
+        statusCode === DisconnectReason.loggedOut || statusCode === 401;
 
       if (isLoggedOut) {
         try {
@@ -391,7 +398,6 @@ async function startBot() {
         } catch (e) {}
       }
 
-      // Always reconnect unless we intentionally want to stop
       setTimeout(startBot, statusCode === 515 ? 1500 : 3000);
     } else if (connection === "open") {
       isConnected = true;
