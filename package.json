@@ -7,7 +7,7 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "@musteqeem/baileys": "latest",
+    "@musteqeem/baileys": "^1.0.7",
     "@hapi/boom": "^10.0.1",
     "express": "^4.21.0",
     "pino": "^9.4.0"
