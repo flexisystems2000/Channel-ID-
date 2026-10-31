@@ -1,26 +1,16 @@
 {
-  "name": "flexi-whatsapp-bot",
+  "name": "whatsapp-channel-bot-baileys",
   "version": "1.0.0",
-  "description": "Flexi Educational Consult WhatsApp Bot with Pairing Code and Channel JID Extractor",
+  "description": "WhatsApp Channel ID bot using Baileys + Pairing Code",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "node index.js"
+    "start": "node index.js"
   },
-  "keywords": [
-    "baileys",
-    "whatsapp-bot",
-    "pairing-code",
-    "flexi-edtech"
-  ],
-  "author": "Flexi Educational Consult",
-  "license": "ISC",
   "dependencies": {
     "@whiskeysockets/baileys": "^6.7.18",
-    "express": "^4.19.2",
-    "pino": "^9.1.0"
-  },
-  "engines": {
-    "node": ">=18.0.0"
+    "@hapi/boom": "^10.0.1",
+    "express": "^4.21.0",
+    "pino": "^9.4.0",
+    "socket.io": "^4.8.0"
   }
 }
