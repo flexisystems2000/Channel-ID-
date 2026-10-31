@@ -1,7 +1,7 @@
 {
-  "name": "whatsapp-channel-bot-baileys",
+  "name": "whatsapp-channel-bot",
   "version": "1.0.0",
-  "description": "WhatsApp Channel ID bot using Baileys + Pairing Code",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -10,7 +10,6 @@
     "@whiskeysockets/baileys": "^6.7.18",
     "@hapi/boom": "^10.0.1",
     "express": "^4.21.0",
-    "pino": "^9.4.0",
-    "socket.io": "^4.8.0"
+    "pino": "^9.4.0"
   }
 }
